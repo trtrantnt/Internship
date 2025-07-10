@@ -2,7 +2,6 @@
 
 **Triển khai Hệ thống Quản trị Danh tính Toàn diện với Đánh giá Truy cập Tự động và Phân tích Rủi ro**
 
-
 ---
 
 ## MỤC LỤC
@@ -1076,7 +1075,7 @@ jobs:
         uses: securecodewarrior/github-action-add-sarif@v1
         with:
           sarif-file: security-scan-results.sarif
-    
+  
   unit-tests:
     runs-on: ubuntu-latest
     steps:
@@ -1089,7 +1088,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Chạy tests
         run: pytest tests/ --cov=src/ --cov-report=xml
-    
+  
   infrastructure-validation:
     runs-on: ubuntu-latest
     steps:
@@ -1100,7 +1099,7 @@ jobs:
             --template-body file://infrastructure/main.yaml
       - name: Chạy cfn-lint
         run: cfn-lint infrastructure/*.yaml
-    
+  
   deploy-dev:
     needs: [security-scan, unit-tests, infrastructure-validation]
     if: github.ref == 'refs/heads/develop'
@@ -1131,7 +1130,7 @@ class TestCertificationEngine(unittest.TestCase):
     def setUp(self):
         self.engine = CertificationEngine()
         self.iam_client = boto3.client('iam', region_name='us-east-1')
-      
+    
     def test_user_risk_calculation(self):
         """Kiểm thử tính toán điểm rủi ro người dùng"""
         user_data = {
@@ -1139,27 +1138,27 @@ class TestCertificationEngine(unittest.TestCase):
             'permissions': ['s3:GetObject', 's3:PutObject', 'ec2:DescribeInstances'],
             'last_access': '2025-07-01T10:00:00Z'
         }
-      
+    
         usage_data = {
             'test-user-001': {
                 'actions_used': ['s3:GetObject'],
                 'last_activity': '2025-07-09T15:30:00Z'
             }
         }
-      
+    
         risk_score = self.engine.calculate_user_risk(user_data, usage_data)
-      
+    
         self.assertGreater(risk_score, 0)
         self.assertLessEqual(risk_score, 10)
-      
+    
     @patch('boto3.client')
     def test_certification_workflow_initiation(self, mock_boto_client):
         """Kiểm thử khởi tạo luồng công việc chứng nhận"""
         mock_stepfunctions = Mock()
         mock_boto_client.return_value = mock_stepfunctions
-      
+    
         result = self.engine.initiate_certification_cycle()
-      
+    
         mock_stepfunctions.start_execution.assert_called_once()
         self.assertEqual(result['status'], 'initiated')
 
